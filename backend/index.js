@@ -6,6 +6,8 @@ const { PORT } = require("./config/index");
 
 const app = express();
 
+app.use(express.json());
+
 app.use(router);
 
 // Error Handler MiddleWare 
