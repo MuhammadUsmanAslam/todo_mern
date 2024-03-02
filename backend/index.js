@@ -2,9 +2,11 @@ const express = require("express");
 const router = require("./routes/index");
 const errorHandler = require("./middlewares/errorHandler");
 require("dotenv").config();
-const { PORT } = require("./config/index");
+const { PORT, connectMongoDB } = require("./config/index");
 
 const app = express();
+
+connectMongoDB();
 
 app.use(express.json());
 

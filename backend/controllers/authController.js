@@ -1,4 +1,4 @@
-const { userRegistrationSchema } = require("../schemaValidators/user_validator");
+const { userRegistrationSchema, userLoginSchema } = require("../schemaValidators/user_validator");
 
 const authController = {
     register: (req, res, next) => {
@@ -9,6 +9,7 @@ const authController = {
         if(error) {
             return next(error);
         }
+
         res.status(200).json("Registration Validation is passed now work on storing data into db")
     },
     login: (req, res, next) => {
