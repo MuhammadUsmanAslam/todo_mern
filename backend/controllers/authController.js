@@ -1,8 +1,9 @@
 const { userRegistrationSchema, userLoginSchema } = require("../schemaValidators/user_validator");
+const User = require("../models/User");
+const bcrypt = require("bcrypt");
 
 const authController = {
-    register: (req, res, next) => {
-        // res.send("Resgister new User");
+    register: async (req, res, next) => {
         const {error} = userRegistrationSchema.validate(req.body);
 
         // If there's any validation error then return and pass that error into next()
@@ -10,17 +11,49 @@ const authController = {
             return next(error);
         }
 
-        res.status(200).json("Registration Validation is passed now work on storing data into db")
+        const {name, email, password} = req.body;
+
+        const userExist = await User.exists({email});
+
+        if(userExist){
+            return res.status(400).json("User already exist");
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        const userCreated = await User.create({name, email, password:hashedPassword});        
+
+        if(userCreated){
+            return res.status(200).json("User created success");
+        }
+
+        return next();
     },
-    login: (req, res, next) => {
-        // res.send("User Login");
+    login: async (req, res, next) => {
         const {error} = userLoginSchema.validate(req.body);
 
         // If there's any validation error then return and pass that error into next()
         if(error) {
             return next(error);
         }
-        res.status(200).json(" Login Validation is passed now work on storing data into db")
+
+        const {email, password} = req.body;
+
+        const userExist = await User.findOne({email});
+
+        if(!userExist){
+            return res.status(400).json("User does not exist");
+        }
+
+        const passwordMatched = await bcrypt.compare(password, userExist.password);
+
+        if(!passwordMatched){
+            return res.status(400).json("Invalid Credentials");
+        }else if(passwordMatched){
+            return res.status(200).json("Login sucess " + passwordMatched);
+        }
+
+        return next();
     }
 }
 
